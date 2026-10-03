@@ -1,0 +1,25 @@
+services:
+  feedback-collector:
+    image: rajmaurya23/feedback-collector:1.1
+    container_name: feedback-collector-compose
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: feedback-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - feedback-collector
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: feedback-grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
