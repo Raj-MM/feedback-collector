@@ -1,0 +1,7 @@
+services:
+  feedback-collector:
+    image: rajmaurya23/feedback-collector:1.0
+    container_name: feedback-collector-compose
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
