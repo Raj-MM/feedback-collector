@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY app.py .
 
-RUN pip install --no-cache-dir flask
+RUN pip install --no-cache-dir flask prometheus-flask-exporter
 
 EXPOSE 5000
 
