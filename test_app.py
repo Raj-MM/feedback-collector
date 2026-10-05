@@ -5,6 +5,7 @@ def test_health():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.data == b"OK"
+    assert response.content_type == "text/html; charset=utf-8"
 
 
 def test_add_feedback():
