@@ -1,11 +1,16 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 
+@app.route("/")
+def home():
+    return render_template("index.html")
+
 # In-memory list to store feedback
 feedback_items = []
+
 
 
 @app.route("/items", methods=["GET"])
