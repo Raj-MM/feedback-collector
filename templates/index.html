@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feedback Collector</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        background: #f4f7fb;
+        color: #1f2937;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 900px;
+        margin: 40px auto;
+      }
+
+      header {
+        background: #2563eb;
+        color: white;
+        padding: 30px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+      }
+
+      header h1 {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      header p {
+        opacity: 0.9;
+      }
+
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      }
+
+      .card h2 {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+      }
+
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 18px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      .feedback {
+        border: 1px solid #e5e7eb;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+      }
+
+      .feedback h3 {
+        margin-bottom: 6px;
+      }
+
+      .rating {
+        color: #f59e0b;
+        margin-top: 6px;
+      }
+
+      #message {
+        margin-top: 15px;
+        font-weight: bold;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 20px;
+        background: #dcfce7;
+        color: #166534;
+        font-weight: bold;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          width: 94%;
+          margin: 20px auto;
+        }
+
+        header h1 {
+          font-size: 26px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Feedback Collector</h1>
+        <p>Share your experience and help us improve.</p>
+      </header>
+
+      <div class="card">
+        <h2>Add Feedback</h2>
+
+        <form id="feedbackForm">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required />
+
+          <label for="messageInput">Message</label>
+          <textarea
+            id="messageInput"
+            placeholder="Write your feedback..."
+            required
+          ></textarea>
+
+          <label for="rating">Rating</label>
+          <select id="rating" required>
+            <option value="">Select rating</option>
+            <option value="1">⭐ 1</option>
+            <option value="2">⭐⭐ 2</option>
+            <option value="3">⭐⭐⭐ 3</option>
+            <option value="4">⭐⭐⭐⭐ 4</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5</option>
+          </select>
+
+          <button type="submit">Submit Feedback</button>
+
+          <div id="message"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Recent Feedback</h2>
+        <div id="feedbackList">Loading feedback...</div>
+      </div>
+
+      <div class="card">
+        <h2>System Status</h2>
+        <span class="status" id="healthStatus"> Checking... </span>
+      </div>
+    </div>
+
+    <script>
+      async function loadFeedback() {
+        try {
+          const response = await fetch("/items");
+          const items = await response.json();
+
+          const list = document.getElementById("feedbackList");
+
+          if (items.length === 0) {
+            list.innerHTML = "<p>No feedback available yet.</p>";
+            return;
+          }
+
+          list.innerHTML = "";
+
+          items.forEach((item) => {
+            const feedback = document.createElement("div");
+            feedback.className = "feedback";
+
+            feedback.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p>${item.message}</p>
+                    <div class="rating">
+                        ${"⭐".repeat(item.rating)}
+                    </div>
+                `;
+
+            list.appendChild(feedback);
+          });
+        } catch (error) {
+          document.getElementById("feedbackList").innerHTML =
+            "<p>Unable to load feedback.</p>";
+        }
+      }
+
+      document
+        .getElementById("feedbackForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const message = document.getElementById("messageInput").value;
+          const rating = Number(document.getElementById("rating").value);
+
+          const response = await fetch("/items", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: name,
+              message: message,
+              rating: rating,
+            }),
+          });
+
+          if (response.ok) {
+            document.getElementById("message").textContent =
+              "Feedback submitted successfully!";
+
+            document.getElementById("feedbackForm").reset();
+
+            loadFeedback();
+          } else {
+            document.getElementById("message").textContent =
+              "Failed to submit feedback.";
+          }
+        });
+
+      async function checkHealth() {
+        try {
+          const response = await fetch("/health");
+
+          if (response.ok) {
+            document.getElementById("healthStatus").textContent =
+              "● API Healthy";
+          } else {
+            document.getElementById("healthStatus").textContent = "● API Error";
+          }
+        } catch (error) {
+          document.getElementById("healthStatus").textContent = "● API Offline";
+        }
+      }
+
+      loadFeedback();
+      checkHealth();
+    </script>
+  </body>
+</html>
