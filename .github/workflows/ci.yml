@@ -20,7 +20,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.11"git config user.name
+git config user.email
 
       - name: Install dependencies
         run: |
